@@ -1,0 +1,48 @@
+from karel.stanfordkarel import *
+
+def turn_right():
+    for n in range(3):
+        turn_left()
+
+def turn_around():
+    for n in range(2):
+        turn_left()
+
+def face_north():
+    while not_facing_north():
+        turn_left()
+
+def face_west():
+    while not_facing_west():
+        turn_left()
+
+def face_south():
+    while not_facing_south():
+        turn_left()
+
+def face_east():
+    while not_facing_east():
+        turn_left()
+
+def find_edge():
+    while front_is_clear():
+        move()
+
+#find an open path that isn't where you came from
+#assumes Karel is facing the direction she just moved from
+def find_path():
+    if front_is_blocked():
+        turn_left()
+        if front_is_blocked():
+            turn_around()
+
+def half_slope():
+    face_east()
+    put_beeper()
+    if front_is_clear():
+        move()
+        move()
+        face_north()
+        move()
+        half_slope()
+

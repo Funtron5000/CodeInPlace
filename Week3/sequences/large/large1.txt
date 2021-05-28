@@ -1,0 +1,4 @@
+__TG_
+AC_AT
+T_TCC
+GG_GG
