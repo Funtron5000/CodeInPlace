@@ -2,16 +2,16 @@
 from simpleimage import SimpleImage
 import random
 
-PUZZLE_IMAGE = SimpleImage('Final/images/slide_shiba_medium.png')
+PUZZLE_IMAGE = SimpleImage('Final/images/slide_shiba_small.png')
 SLIDE_COLUMNS = 3
 SLIDE_ROWS = 3
 PIECE_WIDTH = PUZZLE_IMAGE.width // SLIDE_COLUMNS
 PIECE_HEIGHT = PUZZLE_IMAGE.height // SLIDE_ROWS
-SHUFFLES = 6
+SHUFFLES = 2
 
 def main():
     pieces = make_pieces()
-    pieces = remove_piece(pieces)
+    remove_piece(pieces)
     solved_puzzle = get_puzzle_state(pieces)
     game_loop(solved_puzzle, pieces)
 
@@ -70,8 +70,6 @@ def move_piece(pieces: list, move: int)->list:
         if piece[3] == 0:
             blank_piece = piece
             temp_blank_piece = piece.copy()
-            blank_row = blank_piece[1]
-            blank_column = blank_piece[2]
             break
         blank_index += 1
     
@@ -82,7 +80,6 @@ def move_piece(pieces: list, move: int)->list:
     pieces[move_index] = blank_piece
 
     return pieces
-
 
 #Makes a list of pieces
 #These pieces contain the piece image to be moved around
@@ -113,8 +110,23 @@ def make_new_piece(column: int, row: int, position: int)->list:
     #new_image = make_piece_border(new_image)
     return [new_image, column, row, position]
 
+def make_new_piece2(column: int, row: int, position: int)->list:
+    x_start = column * PIECE_WIDTH
+    y_start = row * PIECE_HEIGHT
+    new_image = SimpleImage.blank(PIECE_WIDTH, PIECE_HEIGHT)
+    piece_y = 0
+    for y in range(y_start, y_start + PIECE_HEIGHT):
+        piece_x = 0
+        for x in range(x_start, x_start + PIECE_WIDTH):
+            new_image.set_pixel(piece_x, piece_y, PUZZLE_IMAGE.get_pixel(x, y))
+            piece_x += 1
+        piece_y += 1
+    #new_image = make_piece_border(new_image)
+    return [new_image, position, position, 1]
+
+
 #makes a border around the piece, optional
-def make_piece_border(image: SimpleImage)->list:
+def make_piece_border(image: SimpleImage)->SimpleImage:
     border_size = 1
     for pixel in image:
         if (pixel.x <= border_size or pixel.y <= border_size) or (pixel.x >= (image.width - border_size - 1) or pixel.y >= (image.height - border_size - 1)):
@@ -124,22 +136,16 @@ def make_piece_border(image: SimpleImage)->list:
     return image
 
 #removes a piece from the image to make the blank piece
-def remove_piece(pieces: list)->list:
+def remove_piece(pieces: list)->None:
     blank_image = SimpleImage.blank(PIECE_WIDTH, PIECE_HEIGHT)
-    removed_piece_position = random.randint(1,9)
-    new_pieces = []
-    for index, list in enumerate(pieces):
-        if list[3] == removed_piece_position:
-            blank_piece = [blank_image, list[1], list[2], 0]
-            new_pieces.append(blank_piece)
-        else:
-            new_pieces.append(list)
-    return new_pieces
+    removed_piece_index = random.randint(0,8)
+    pieces[removed_piece_index][0] = blank_image
+    pieces[removed_piece_index][3] = 0
 
 #shuffles the pieces by selecting a valid move for the number
 #of times set in the SHUFFLES global
 def get_shuffled_pieces(pieces: list)->list:
-    for n in range(SHUFFLES):
+    for n in range(SHUFFLES + 1):
         puzzle = get_puzzle_state(pieces)
         valid_moves = get_valid_moves(puzzle)
         move = random.choice(valid_moves)
@@ -148,7 +154,7 @@ def get_shuffled_pieces(pieces: list)->list:
 
 #shows the current state of the puzzle image
 def show_puzzle(pieces: list)->None:
-    puzzle = copy_image(PUZZLE_IMAGE)
+    puzzle = SimpleImage.blank(PUZZLE_IMAGE.width, PUZZLE_IMAGE.height)
     for piece in pieces:
         puzzle = place_piece(piece[0], puzzle, piece[1] * PIECE_WIDTH, piece[2] * PIECE_HEIGHT)
     puzzle.show()
